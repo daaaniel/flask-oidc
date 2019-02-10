@@ -521,6 +521,21 @@ class OpenIDConnect(object):
             return decorated
         return wrapper
 
+    def require_realm_role(self, role):
+        def wrapper(view_func):
+            @wraps(view_func)
+            def decorated(*args, **kwargs):
+                access_token = self.get_access_token().split('.')
+                b64_string = access_token[1]
+                b64_string += "=" * ((4 - len(b64_string) % 4) % 4)
+                json_token=json.loads(b64decode(b64_string))
+                if role in json_token['realm_access']['roles']:
+                    return view_func(*args, **kwargs)
+                else:
+                    return abort(403)
+            return decorated
+        return wrapper
+
     def flow_for_request(self):
         """
         .. deprecated:: 1.0
