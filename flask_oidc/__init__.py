@@ -522,6 +522,11 @@ class OpenIDConnect(object):
         return wrapper
 
     def require_realm_role(self, role):
+        """
+        Function to check for a KeyCloak realm role in JWT access token.
+
+        .. versionadded:: 1.6.0
+        """
         def wrapper(view_func):
             @wraps(view_func)
             def decorated(*args, **kwargs):
@@ -535,6 +540,22 @@ class OpenIDConnect(object):
                     return abort(403)
             return decorated
         return wrapper
+    
+    def has_realm_role(self, role):
+        """
+        Function to check for a KeyCloak realm role in JWT access token.
+
+        .. versionadded:: 1.6.0
+        """
+        
+        access_token = self.get_access_token()
+        if access_token is not None:
+            b64_string = access_token.split('.')[1]
+            b64_string += "=" * ((4 - len(b64_string) % 4) % 4)
+            json_token=json.loads(b64decode(b64_string))
+            if role in json_token['realm_access']['roles']:
+                return True
+        return False
 
     def flow_for_request(self):
         """
