@@ -549,10 +549,13 @@ class OpenIDConnect(object):
         """
         
         access_token = self.get_access_token()
+        logger.debug(access_token)
         if access_token is not None:
+            logger.debug(access_token)
             b64_string = access_token.split('.')[1]
             b64_string += "=" * ((4 - len(b64_string) % 4) % 4)
             json_token=json.loads(b64decode(b64_string))
+            logger.debug(json_token)
             if role in json_token['realm_access']['roles']:
                 return True
         return False
